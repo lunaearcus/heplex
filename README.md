@@ -5,6 +5,11 @@ Tanita の Health Planet からデータをエクスポートして Google Fit �
 ### API Spec.
 https://www.healthplanet.jp/apis/api.html
 
+### Credentials
+スクリプトのプロパティに下記を設定
+- HEALTH_PLANET_CLIENT_ID
+- HEALTH_PLANET_CLIENT_SECRET
+
 ### Note
 認可リクエスト時のクエリストリングに含まれる state パラメータを保持してくれないため、下記の手順が必要
 - 事前に state をコピーしておく
