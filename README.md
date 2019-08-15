@@ -1,6 +1,10 @@
 # heplex
 Tanita の Health Planet からデータをエクスポートして Google Fit に登録したい気持ちのプロジェクト
 
+## Summary
+- Health Planet から data シートにデータを取得
+    - Date 列の最後より新しいデータを取得
+- Process 列が空の体重について Google Fit に送信
 ## Data Export
 ### API Spec.
 https://www.healthplanet.jp/apis/api.html
@@ -26,3 +30,11 @@ https://www.healthplanet.jp/apis/api.html
 - Standard Project を作成して紐づけが必要
 - 同意画面でアプリケーション名のみ設定
 - Fitness API を有効化
+
+### Private Info.
+スクリプトのプロパティに下記を設定
+- SCALE_UID
+
+### Note.
+- データポイントを 3 つくらい送ったけど一番古い 1 つしかアプリでは確認できなかった
+    - API で GET すると全部確認できたので送られてはいる
