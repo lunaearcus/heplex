@@ -1,15 +1,36 @@
+'use strict';
 // Global Variables
 this.applicationSettings = this.applicationSettings || {
   dataSheet:{
     name:'data'
-  , defaultColumns: ['Process', 'Date', '体重 (kg)', '体脂肪率 (%)', '筋肉量 (kg)', '筋肉スコア', '内臓脂肪レベル2', '内臓脂肪レベル', '基礎代謝量 (kcal)', '体内年齢 (才)', '推定骨量 (kg)' ]
+  , defaultColumns:['Process', 'Date', '体重 (kg)', '体脂肪率 (%)', '筋肉量 (kg)', '筋肉スコア', '内臓脂肪レベル2', '内臓脂肪レベル', '基礎代謝量 (kcal)', '体内年齢 (才)', '推定骨量 (kg)' ]
   }
 , processColumn:{ range:'A:A', index:1 }
 , dateColumn:{ range:'B:B', index:2 }
+, fitness:{
+    dataSourceName:'BC-768 Weight by heplex'
+  , application:{
+      name:'heplex'
+    , detailsUrl:'https://github.com/lunaearcus/heplex'
+    , version:'1'
+    }
+  , device:{
+      manufacturer:'TANITA'
+    , model:'BC-768'
+    , type:'scale'
+    , uid:PropertiesService.getScriptProperties().getProperty('SCALE_UID')
+    , version:'1.0'
+    }
+  }
 };
 this.healthPlanetClient = this.healthPlanetClient || new HealthPlanetClient(
   PropertiesService.getScriptProperties().getProperty('HEALTH_PLANET_CLIENT_ID')
 , PropertiesService.getScriptProperties().getProperty('HEALTH_PLANET_CLIENT_SECRET')
+);
+this.fitnessClient = this.fitnessClient || new FitnessClient(
+  this.applicationSettings.fitness.dataSourceName
+, this.applicationSettings.fitness.application
+, this.applicationSettings.fitness.device
 );
 
 // Initialize
@@ -37,16 +58,21 @@ function processWeightData(){
   const lastDataRow = getLastRow(sheet, applicationSettings.dateColumn.range);
   const lastProcessRow = getLastRow(sheet, applicationSettings.processColumn.range);
   if (lastDataRow <= lastProcessRow) { return false; }
+  const source = sheet.getRange(lastProcessRow + 1, applicationSettings.dateColumn.index, lastDataRow - lastProcessRow, 2);
   const target = sheet.getRange(lastProcessRow + 1, applicationSettings.processColumn.index, lastDataRow - lastProcessRow, 1);
-  target.setValues(target.getValues().map(function(){ return [(new Date()).getTime()]; }));
-  // Test Access
-  SpreadsheetApp.getUi().showModalDialog(HtmlService.createHtmlOutput(UrlFetchApp.fetch('https://www.googleapis.com/fitness/v1/users/me/dataSources?access_token=' + ScriptApp.getOAuthToken(),{muteHttpExceptions:true}).getContentText()), 'Output');
+  fitnessClient.patchDataSets(source.getValues().map(function(d){ return {
+    ns:((function(ds){
+      return (new Date([ds.substring(0, 4), ds.substring(4, 6), ds.substring(6, 8)].join('-') + 'T' + [ds.substring(8, 10), ds.substring(10, 12), '00'].join(':') + 'Z')).getTime();
+    })(d[0].toString()) - 9 * 60 * 60 * 1000) * 1000000
+  , weight:parseFloat(d[1].toString())
+  }; }));
+  target.setValues(target.getValues().map(function(){ return [(new Date()).toISOString()]; }));
 }
 
 function loadHealthPlanetData(){
   const sheet = getSheetWithCreation(applicationSettings.dataSheet.name);
   const lastRow = getLastRow(sheet, applicationSettings.dateColumn.range);
-  const fromDate = (((parseInt(sheet.getRange(lastRow, 2).getValue().toString().replace(/[^0-9]/g, ''), 10) || 0) + 1).toString(10) + '00000000000000').substr(0, 14);
+  const fromDate = (((parseInt(sheet.getRange(lastRow, 2).getValue().toString().replace(/[^0-9]/g, ''), 10) || 0) + 1).toString(10) + '00000000000000').substring(0, 14);
   const tags = [6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029];
   const data = {};
   try{
@@ -71,6 +97,13 @@ function loadHealthPlanetData(){
   if (rows.length > 0){
     sheet.getRange(lastRow + 1, applicationSettings.dateColumn.index, rows.length, rows[0].length).setValues(rows); 
   }
+}
+
+// For Trigger
+function loadAndProcess(){
+  loadHealthPlanetData();
+  Utilities.sleep(1000);
+  processWeightData();
 }
 
 // Not Used
