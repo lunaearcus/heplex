@@ -20,3 +20,9 @@ https://www.healthplanet.jp/apis/api.html
 
 ### Sheet
 - data という名前のシートを作成して追記
+
+## Data Import
+### GCP Project
+- Standard Project を作成して紐づけが必要
+- 同意画面でアプリケーション名のみ設定
+- Fitness API を有効化
