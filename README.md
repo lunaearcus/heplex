@@ -36,7 +36,3 @@ https://www.healthplanet.jp/apis/api.html
 ### Private Info.
 スクリプトのプロパティに下記を設定
 - SCALE_UID
-
-### Note.
-- データポイントをいくつか送ったけど一番古い 1 つしかアプリでは確認できなかった
-    - API で GET すると全部確認できたので送られてはいる
