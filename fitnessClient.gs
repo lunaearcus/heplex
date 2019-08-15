@@ -36,7 +36,7 @@ function FitnessClient(dataStreamName, application, device){
         }
       };
       dataSource = JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/fitness/v1/users/me/dataSources', options).getContentText());
-      Logger.log(dataSource);
+      console.log(dataSource);
     }
     return dataSource;
   };
@@ -63,6 +63,6 @@ function FitnessClient(dataStreamName, application, device){
       , 'Content-Type':'application/json;encoding=utf-8'
       }
     };
-    Logger.log(JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/fitness/v1/users/me/dataSources/' + dataSourceId + '/datasets/' + [minStartTimeNs, maxEndTimeNs].join('-'), options).getContentText()));
+    console.log(JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/fitness/v1/users/me/dataSources/' + dataSourceId + '/datasets/' + [minStartTimeNs, maxEndTimeNs].join('-'), options).getContentText()));
   };
 }
