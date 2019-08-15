@@ -5,6 +5,8 @@ Tanita の Health Planet からデータをエクスポートして Google Fit �
 - Health Planet から data シートにデータを取得
     - Date 列の最後より新しいデータを取得
 - Process 列が空の体重について Google Fit に送信
+- エラーハンドリングは適当というかほぼしていないので注意
+
 ## Data Export
 ### API Spec.
 https://www.healthplanet.jp/apis/api.html
@@ -36,5 +38,5 @@ https://www.healthplanet.jp/apis/api.html
 - SCALE_UID
 
 ### Note.
-- データポイントを 3 つくらい送ったけど一番古い 1 つしかアプリでは確認できなかった
+- データポイントをいくつか送ったけど一番古い 1 つしかアプリでは確認できなかった
     - API で GET すると全部確認できたので送られてはいる
