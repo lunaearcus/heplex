@@ -1,3 +1,6 @@
+/**
+ * @OnlyCurrentDoc
+ */
 'use strict';
 // Global Variables
 this.applicationSettings = this.applicationSettings || {
@@ -74,13 +77,13 @@ function loadHealthPlanetData(){
   const lastRow = getLastRow(sheet, applicationSettings.dateColumn.range);
   const lastRowDate = sheet.getRange(lastRow, applicationSettings.dateColumn.index).getValue().toString();
   const fromDate = (((parseInt(lastRowDate.replace(/[^0-9]/g, ''), 10) || 0) + 1).toString(10) + '00000000000000').substring(0, 14);
-  const tags = [6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029];
+  const tags = [6021, 6022];
   const data = {};
   try{
     const params = {date:0, tag:tags.join(',')};
     // First Time Export (3 months)
     if (fromDate !== '10000000000000') {
-      params.from =fromDate;
+      params.from = fromDate;
     }
     healthPlanetClient.fetchInnerscan(params).data.forEach(function(v){
       data[v.date] = data[v.date] || {};
