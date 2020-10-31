@@ -77,15 +77,18 @@ function loadHealthPlanetData(){
   const lastRow = getLastRow(sheet, applicationSettings.dateColumn.range);
   const lastRowDate = sheet.getRange(lastRow, applicationSettings.dateColumn.index).getValue().toString();
   const fromDate = (((parseInt(lastRowDate.replace(/[^0-9]/g, ''), 10) || 0) + 1).toString(10) + '00000000000000').substring(0, 14);
+  const oldestThreshold = (new Date(Date.now() - 1000 * 3600 * 24 * 89)).toISOString().replace(/[^0-9]/g, '').substring(0, 14);
   const tags = [6021, 6022];
   const data = {};
   try{
     const params = {date:0, tag:tags.join(',')};
-    // First Time Export (3 months)
-    if (fromDate !== '10000000000000') {
+    // First Time Export (3 months) or There is 3 months or over Blank.
+    if (fromDate !== '10000000000000' && fromDate >= oldestThreshold) {
       params.from = fromDate;
     }
-    healthPlanetClient.fetchInnerscan(params).data.forEach(function(v){
+    const response = healthPlanetClient.fetchInnerscan(params);
+    // console.log(response);
+    response.data.forEach(function(v){
       data[v.date] = data[v.date] || {};
       data[v.date][v.tag] = v.keydata;
     });
