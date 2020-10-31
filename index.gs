@@ -1,3 +1,6 @@
+/**
+ * @OnlyCurrentDoc
+ */
 'use strict';
 // Global Variables
 this.applicationSettings = this.applicationSettings || {
@@ -72,16 +75,20 @@ function processWeightData(){
 function loadHealthPlanetData(){
   const sheet = getSheetWithCreation(applicationSettings.dataSheet.name);
   const lastRow = getLastRow(sheet, applicationSettings.dateColumn.range);
-  const fromDate = (((parseInt(sheet.getRange(lastRow, 2).getValue().toString().replace(/[^0-9]/g, ''), 10) || 0) + 1).toString(10) + '00000000000000').substring(0, 14);
-  const tags = [6021, 6022, 6023, 6024, 6025, 6026, 6027, 6028, 6029];
+  const lastRowDate = sheet.getRange(lastRow, applicationSettings.dateColumn.index).getValue().toString();
+  const fromDate = (((parseInt(lastRowDate.replace(/[^0-9]/g, ''), 10) || 0) + 1).toString(10) + '00000000000000').substring(0, 14);
+  const oldestThreshold = (new Date(Date.now() - 1000 * 3600 * 24 * 89)).toISOString().replace(/[^0-9]/g, '').substring(0, 14);
+  const tags = [6021, 6022];
   const data = {};
   try{
     const params = {date:0, tag:tags.join(',')};
-    // First Time Export (3 months)
-    if (fromDate !== '10000000000000') {
-      params.from =fromDate;
+    // First Time Export (3 months) or There is 3 months or over Blank.
+    if (fromDate !== '10000000000000' && fromDate >= oldestThreshold) {
+      params.from = fromDate;
     }
-    healthPlanetClient.fetchInnerscan(params).data.forEach(function(v){
+    const response = healthPlanetClient.fetchInnerscan(params);
+    // console.log(response);
+    response.data.forEach(function(v){
       data[v.date] = data[v.date] || {};
       data[v.date][v.tag] = v.keydata;
     });
@@ -89,7 +96,7 @@ function loadHealthPlanetData(){
     SpreadsheetApp.getUi().showModalDialog(HtmlService.createHtmlOutput(e.message), 'Error');
     return false;
   }
-  const rows = Object.keys(data).sort().map(function(v){
+  const rows = Object.keys(data).filter(function(v){ return (v !== lastRowDate); }).sort().map(function(v){
     const row = tags.map(function(t){ return data[v][t] || ''; });
     row.unshift(v);
     return row;
