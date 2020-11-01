@@ -1,68 +1,51 @@
-function FitnessClient(dataStreamName, application, device){
-  // https://lowreal.net/2018/03/07/1
-  const self = this;
-  this.dataStreamName = dataStreamName;
-  this.application = application;
-  this.device = device;
-  this.accessToken = ScriptApp.getOAuthToken();
-  this.getDataSources = function(){
+// https://lowreal.net/2018/03/07/1
+class FitnessClient {
+  static get API_DATASOURCES() { return 'https://www.googleapis.com/fitness/v1/users/me/dataSources'; }
+  constructor(dataStreamName, application, device) {
+    Object.assign(this, {dataStreamName, application, device, accessToken:ScriptApp.getOAuthToken()});
+  }
+  getDataSources() {
     try {
-      return JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/fitness/v1/users/me/dataSources?access_token=' + self.accessToken).getContentText()).dataSource;
+      return JSON.parse(UrlFetchApp.fetch(`${FitnessClient.API_DATASOURCES}?access_token=${this.accessToken}`).getContentText()).dataSource;
     } catch(e) {
       return [];
     }
-  };
-  this.getDataSourceWithCreation = function(){
-    var dataSource;
-    try {
-      dataSource = self.getDataSources().filter(function(d) { return (d.dataStreamName = self.dataStreamName && d.application.name === self.application.name); })[0];
-    } catch(e) {
-      throw new Error('Failed to get DataSources');
-    }
-    if (dataSource === undefined) {
-      // Create DataSource
-      const options = {
-        method:'POST'
-      , payload:JSON.stringify({
-          application:self.application
-        , device:self.device
-        , dataStreamName:self.dataStreamName
-        , type:'raw'
-        , dataType:{ name:'com.google.weight', field:[{ name:'weight', format:'floatPoint' }] }
-        })
-      , headers:{
-          'Authorization':['Bearer', self.accessToken].join(' ')
-        , 'Content-Type':'application/json;encoding=utf-8'
-        }
-      };
-      dataSource = JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/fitness/v1/users/me/dataSources', options).getContentText());
-      console.log(dataSource);
-    }
-    return dataSource;
-  };
-  this.patchDataSets = function(dataPoints){
-    const dataSourceId = self.getDataSourceWithCreation().dataStreamId;
-    const minStartTimeNs = Math.min.apply(null, dataPoints.map(function(d){ return d.ns; }));
-    const maxEndTimeNs = Math.max.apply(null, dataPoints.map(function(d){ return d.ns; }));
+  }
+  getDataSourceWithCreation() {
+    const dataSource = (() => {
+      try {
+        return this.getDataSources().filter((dataSource) => (dataSource.dataStreamName === this.dataStreamName && dataSource.application.name === this.application.name))[0];
+      } catch(e) {
+        throw new Error('Failed to get DataSources');
+      }
+    })();
+    if (dataSource !== undefined) { return dataSource; }
+
+    // Create DataSource
+    const options = {
+      method:'POST'
+    , payload:JSON.stringify({application:this.application, device:this.device, dataStreamName:this.dataStreamName, type:'raw', dataType:{name:'com.google.weight', field:[{name:'weight', format:'floatPoint'}]}})
+    , headers:{'Authorization':['Bearer', this.accessToken].join(' '), 'Content-Type':'application/json;encoding=utf-8'}
+    };
+    const response = JSON.parse(UrlFetchApp.fetch(FitnessClient.API_DATASOURCES, options).getContentText());
+    console.log(response);
+    return response;
+  }
+  patchDataSets(dataPoints) {
+    const dataSourceId = this.getDataSourceWithCreation().dataStreamId;
+    const [minStartTimeNs, maxEndTimeNs] = [Math.min(...dataPoints.map((data) => data.ns)), Math.max(...dataPoints.map((data) => data.ns))];
     const options = {
       method:'PATCH'
     , payload:JSON.stringify({
         dataSourceId:dataSourceId
       , minStartTimeNs:minStartTimeNs
       , maxEndTimeNs:maxEndTimeNs
-      , point:dataPoints.sort(function(a, b){ return (a.ns < b.ns) ? 1 : -1; }).map(function(d){ return {
-          dataTypeName:'com.google.weight'
-        , originDataSourceId:''
-        , startTimeNanos: d.ns
-        , endTimeNanos: d.ns
-        , value:[{ fpVal: d.weight }]
-        }; })
+      , point:dataPoints.sort((a, b) => (a.ns < b.ns ? 1 : -1)).map((data) => ({dataTypeName:'com.google.weight', originDataSourceId:'', startTimeNanos:data.ns, endTimeNanos:data.ns, value:[{fpVal:data.weight}]}))
       })
-    , headers:{
-        'Authorization':['Bearer', self.accessToken].join(' ')
-      , 'Content-Type':'application/json;encoding=utf-8'
-      }
+    , headers:{'Authorization':['Bearer', this.accessToken].join(' '), 'Content-Type':'application/json;encoding=utf-8'}
     };
-    console.log(JSON.parse(UrlFetchApp.fetch('https://www.googleapis.com/fitness/v1/users/me/dataSources/' + dataSourceId + '/datasets/' + [minStartTimeNs, maxEndTimeNs].join('-'), options).getContentText()));
-  };
+    const response = JSON.parse(UrlFetchApp.fetch(`${FitnessClient.API_DATASOURCES}/${dataSourceId}/datasets/${[minStartTimeNs, maxEndTimeNs].join('-')}`, options).getContentText());
+    console.log(response);
+    return response;
+  }
 }
