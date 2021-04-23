@@ -61,8 +61,8 @@ class Application {
     // 取得済みデータの最終行の取得
     const lastRow = SheetUtil.getLastRow(sheet, ApplicationSettings.dateColumn.range);
     const lastRowDate = sheet.getRange(lastRow, ApplicationSettings.dateColumn.index).getValue().toString();
-    // 最終取得データの 60 秒後から取得
-    const fromDate = DateUtil.addSecondsToDateNumberString(lastRowDate, 60);
+    // 最終取得データの 90 秒後から取得
+    const fromDate = DateUtil.addSecondsToDateNumberString(lastRowDate, 90);
     const tags = ApplicationSettings.healthPlanet.tags;
     const data = {};
     const params = {date:0, tag:tags.join(',')};
