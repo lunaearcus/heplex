@@ -65,7 +65,7 @@ class Application {
     const fromDate = DateUtil.addSecondsToDateNumberString(lastRowDate, 90);
     const tags = ApplicationSettings.healthPlanet.tags;
     const data = {};
-    const params = {date:0, tag:tags.join(',')};
+    const params = {date:1, tag:tags.join(',')};
     // 最終取得データがない場合はデフォルト（3か月前から現在）
     if (fromDate !== undefined) {
       params.from = fromDate;
