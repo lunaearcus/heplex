@@ -69,7 +69,7 @@ class Application {
     // 最終取得データがない場合はデフォルト（3か月前から現在）
     if (fromDate !== undefined) {
       params.from = fromDate;
-      params.to = DateUtil.addSecondsToDateNumberString(lastRowDate, 3600 * 24 * 89);
+      params.to = DateUtil.addSecondsToDateNumberString(lastRowDate, 3600 * 24 * 85);
     }
     try{
       const response = this.healthPlanetClient.fetchInnerscan(params);
