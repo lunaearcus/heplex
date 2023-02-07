@@ -13,8 +13,10 @@ class HealthPlanetClient {
 
     // Refresh Token
     (() => {
+      const token = this.service.getToken();
+      if (!(token && token.refresh_token)) return;
       const payload = {
-        refresh_token: this.service.getToken().refresh_token,
+        refresh_token: token.refresh_token,
         client_id: this.service.clientId_,
         client_secret: this.service.clientSecret_,
         redirect_uri: 'https://www.healthplanet.jp/success.html',
