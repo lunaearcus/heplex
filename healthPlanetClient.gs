@@ -10,6 +10,18 @@ class HealthPlanetClient {
       .setCallbackFunction(callbackFunctionName)
       .setPropertyStore(PropertiesService.getUserProperties())
       .setScope('innerscan');
+
+    // Refresh Token
+    (() => {
+      const payload = {
+        refresh_token: this.service.getToken().refresh_token,
+        client_id: this.service.clientId_,
+        client_secret: this.service.clientSecret_,
+        redirect_uri: 'https://www.healthplanet.jp/success.html',
+        grant_type: 'refresh_token',
+      };
+      this.service.saveToken_(this.service.fetchToken_(payload, this.service.refreshUrl_));
+    })();
   }
   static resetService() {
     OAuth2.createService(HealthPlanetClient.SERVICE_NAME).setPropertyStore(PropertiesService.getUserProperties()).reset();
