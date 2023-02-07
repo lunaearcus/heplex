@@ -36,7 +36,7 @@ class HealthPlanetClient {
     // https://www.healthplanet.jp/apis/api.html
     params.access_token = this.service.getAccessToken();
     const searchParams = Object.keys(params).map((key) => [key, params[key]].join('=')).join('&');
-    const response = UrlFetchApp.fetch(`${HealthPlanetClient.API_INNERSCAN}.json?${searchParams}`).getContentText('Shift_JIS');
+    const response = UrlFetchApp.fetch(`${HealthPlanetClient.API_INNERSCAN}.json?${searchParams}`, {muteHttpExceptions: true}).getContentText('Shift_JIS');
     try{
       return JSON.parse(response);
     } catch(e) {
