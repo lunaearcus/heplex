@@ -1,17 +1,24 @@
 {
   "timeZone": "Asia/Tokyo",
+  "exceptionLogging": "STACKDRIVER",
+  "runtimeVersion": "V8",
   "dependencies": {
-    "libraries": [{
-      "userSymbol": "OAuth2",
-      "libraryId": "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF",
-      "version": "33"
-    }]
+    "libraries": [
+      {
+        "userSymbol": "OAuth2",
+        "libraryId": "1B7FSrk5Zi6L1rSxxTDgDEUsPzlukDsi4KGuTMorsTQHhGBzBkMun4iDF",
+        "version": "43"
+      }
+    ]
   },
   "webapp": {
-    "access": "MYSELF",
-    "executeAs": "USER_DEPLOYING"
+    "executeAs": "USER_DEPLOYING",
+    "access": "MYSELF"
   },
-  "exceptionLogging": "STACKDRIVER",
-  "oauthScopes": ["https://www.googleapis.com/auth/spreadsheets.currentonly", "https://www.googleapis.com/auth/script.container.ui", "https://www.googleapis.com/auth/script.external_request", "https://www.googleapis.com/auth/fitness.body.write"],
-  "runtimeVersion": "V8"
+  "oauthScopes": [
+    "https://www.googleapis.com/auth/spreadsheets.currentonly",
+    "https://www.googleapis.com/auth/script.container.ui",
+    "https://www.googleapis.com/auth/script.external_request",
+    "https://www.googleapis.com/auth/fitness.body.write"
+  ]
 }
